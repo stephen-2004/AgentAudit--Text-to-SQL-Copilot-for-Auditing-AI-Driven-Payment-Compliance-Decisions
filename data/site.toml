@@ -1,0 +1,261 @@
+# data/site.toml
+#
+# Every sentence this app says, grouped by the surface it appears on.
+#
+# The contract is one way: every key named in `REQUIRED_SITE_KEYS`
+# (lib/site/schema.ts) must exist here, extra keys are allowed and only the
+# component that knows about them reads them.
+#
+# TOML trap: once an array of tables starts, every bare key after it belongs to
+# the last element of that array. So each section's plain fields come first.
+
+
+# === Brand =================================================================
+[brand]
+displayName = "AgentAudit"
+
+logoPrefix = "agent"
+logoAccent = "audit"
+
+footerName = "AgentAudit"
+
+
+# === <head> ================================================================
+[seo]
+locale = "en_US"
+title = "AgentAudit: Oversight Analytics for an AI Compliance Agent"
+description = "An AI agent that audits another AI agent. Check whether an AML compliance agent's reported accuracy survives human re-checks, whether people really signed the checkpoints the rules require, and which release changed its behaviour, all through natural conversation."
+keywords = [
+    "AI Oversight",
+    "Human in the Loop",
+    "AML Compliance",
+    "Agent Audit",
+    "Model Risk Management",
+    "Fintech",
+    "AI Agent",
+    "Decision Quality",
+]
+
+
+# === The four business threads. Exactly four ==============================
+#
+# One config, rendered twice: the capability cards on the home page and the
+# insight cards on the agent welcome screen.
+#
+#   title    the concept name. Precise to an insider, opaque to everyone else
+#   subtitle one plain sentence. This is what a stranger reads first
+#   tooltip  two or three sentences: define the term, then say what moves it
+#   status   the finding on this thread, as a short tag at the end of its row.
+#            `tone` picks its colour and is one of:
+#              gap     amber, a reported number that the audit contradicts
+#              breach  red, a rule that was broken
+#              trace   cyan, a finding with no violation in it
+#
+# No jargon inside a tooltip. Explaining one insider word with another is the
+# mistake this field exists to prevent.
+#
+# This used to be two arrays, `home.capabilities` and `chat.insights`, naming
+# the same four things in two vocabularies. They had already drifted, so now
+# there is one list and both screens render it.
+
+[[capabilities]]
+icon = "Target"
+title = "Audited Accuracy"
+subtitle = "Whether the agent's reported accuracy survives a human re-check"
+tooltip = "The platform dashboard says the agent gets about 98 percent of the cases it closes right. Every quarter, auditors redo a random batch of those closed cases by hand, and that recheck is the only answer key in the data. The distance between the two numbers is how far the agent's opinion of itself can be trusted."
+status = { label = "Gap 6.2 pp", tone = "gap" }
+
+[[capabilities]]
+icon = "Shield"
+title = "Human Checkpoint Coverage"
+subtitle = "Whether a person really signed off where the rules demand one"
+tooltip = "Some decisions, like releasing a transfer over $10,000, are only allowed after a person reviews them. The official measure counts a review as done whenever the record says reviewed, without asking who marked it. This measure only counts records carrying a real person's signature, which is what a bank examiner will ask to see."
+status = { label = "316 skipped", tone = "breach" }
+
+[[capabilities]]
+icon = "TrendingUp"
+title = "Release Drift"
+subtitle = "What each new version of the agent changed, and what that did to quality"
+tooltip = "Each release can change how sure the agent must be before it closes a case alone, and how strictly it waits for people. A release can close more cases and look better on its own scorecard while getting more of them wrong. Lining releases up against the audit results shows which change actually moved the numbers."
+status = { label = "2 unaudited", tone = "trace" }
+
+[[capabilities]]
+icon = "Users"
+title = "Review Capacity"
+subtitle = "Whether a stretched review team explains the rise in automatic closes"
+tooltip = "Each reviewer is scheduled to handle a set number of cases a week. Comparing the work that truly needed a person against that number shows whether the team was overloaded. If it was not, closing more cases automatically was a choice someone made, not something the workload forced."
+status = { label = "Load ~75%", tone = "trace" }
+
+
+# === Home page =============================================================
+[home]
+tagline = "AI Agent Oversight Analytics"
+
+description = "An AI agent that helps compliance and product teams audit another AI agent: the one that investigates suspicious transactions for banks, credit unions and buy now pay later lenders. Ask in plain English whether its accuracy claims hold up, whether people really reviewed what the rules require, and which release changed its behaviour."
+
+blurb = "Auditing 18 months of AI compliance decisions: 16 tables, 195,026 records covering cases, agent runs, tool calls, human checkpoints, and quarterly audits"
+
+techStack = ["Strands SDK", "OpenAI", "PostgreSQL", "Next.js"]
+
+[home.headline]
+prefix = "Agent"
+accent = "Audit"
+
+[home.cta]
+title = "Start Auditing"
+subtitle = "Ask how the compliance agent really performs, in plain English"
+
+# The hero's two numbers, set side by side with the gap between them.
+#
+# Both sides are drawn on one error-rate ruler, so the left side's accuracy is
+# converted on the page to the error it implies (100 minus `reported`).
+# `gap` must equal `audited` minus that implied error; `load.ts` rejects a file
+# where they disagree by more than rounding.
+[home.evidence]
+reportedTag = "Reported"
+reportedLabel = "Dashboard accuracy"
+reported = 98.4
+reportedNote = "Graded by the investigation agent itself, and flat to within a tenth of a point for five quarters."
+impliedLabel = "implied error"
+
+auditedTag = "Audited"
+auditedLabel = "Audit overturn rate"
+audited = 7.8
+auditedNote = "Share of auto-closed cases that human auditors redid by hand and overturned. Nearly five times the error the dashboard implies."
+
+gap = 6.2
+gapLabel = "gap"
+
+# Labels for the overlay that renders business-context.md.
+[home.businessContext]
+triggerLabel = "What problem does this solve?"
+title = "The business behind the agent"
+subtitle = "A bank can hand its suspicious transaction reviews to an AI agent, but not its responsibility for them. This is where the agent's own reports drift from the truth, and how this app checks them."
+
+
+# === Agent page ============================================================
+[chat]
+agent = "Auditor"
+welcomeSubtitle = "Ask how the compliance agent really performs, in plain English."
+tryExamples = "Try: \"Does the 98.4% accuracy hold up?\" or \"Which version skipped human checkpoints?\""
+
+suggestionsHint = "Ask me directly or click a suggestion"
+inputPlaceholder = "Enter your question..."
+
+[chat.messages]
+# A whole sentence: the banner prints it as-is. It used to be a fragment that
+# a component wrapped in "I'm here to help you with ...", and the two halves
+# drifted into printing the frame twice.
+welcomeMessage = "I'm here to help you audit an AI compliance agent's decisions."
+waitForResponse = "Wait for the current answer to finish first."
+
+
+# === kickstart questions: exactly 12 ======================================
+#
+# Every one is a rewrite of a line in the Analysis Index of system-prompt.md.
+# Nothing here may ask for an analysis the prompt does not teach.
+#
+# Render quota, exactly 3 of each:
+#
+#   table      "as a Markdown table" and "show the SQL"
+#   flowchart  "as a flowchart"
+#   chart      "as a bar chart" or "as a line chart"
+#   free       none of those phrases may appear
+#
+# The render field draws the icon on the button, the phrase is what actually
+# makes the block appear. `check-content` verifies both directions.
+
+# === free 1 / 3 ===
+[[chat.suggestedActions]]
+render = "free"
+title = "Introduction"
+label = "What can you do?"
+action = "What can you help me audit? Give me a short tour of the data and the kinds of questions you answer well."
+
+# === chart 1 / 3 (line, two series: a widening gap over quarters) ===
+# Index: Accuracy gap by quarter (§2)
+[[chat.suggestedActions]]
+render = "chart"
+title = "Accuracy Gap"
+label = "Is the accuracy gap growing?"
+action = "For each audited quarter, give me the audit overturn rate and the dashboard's implied error rate, which is 100 minus its reported accuracy. Show it as a line chart with one series for each, then say in one line whether the gap is widening."
+
+# === flowchart 1 / 3 (where every checkpoint ended up) ===
+# Index: Checkpoint outcome breakdown (§14)
+[[chat.suggestedActions]]
+render = "flowchart"
+title = "Checkpoint Outcomes"
+label = "Who really cleared each checkpoint?"
+action = "Trace every triggered human checkpoint to where it ended up: signed by a person, cleared by the agent itself, still pending, or expired. Put the count on each stage. Show it as a flowchart."
+
+# === table 1 / 3 (scorecard by version) ===
+# Index: Reported vs true checkpoint coverage by version (§14)
+[[chat.suggestedActions]]
+render = "table"
+title = "Coverage by Version"
+label = "How real is the oversight number?"
+action = "For each workflow version, give me the checkpoint mode, checkpoints triggered, reported coverage, true coverage with a human signature, and the gap in points. Show it as a Markdown table, and show the SQL you ran."
+
+# === free 2 / 3 ===
+# Index: Dashboard accuracy vs audit overturn rate (§1)
+[[chat.suggestedActions]]
+render = "free"
+title = "Headline Accuracy"
+label = "Does the 98.4% hold up?"
+action = "The dashboard reports about 98.4% model accuracy. How does that compare with the overturn rate the human audits found on auto-closed cases? Give me the gap in percentage points and say which number to trust."
+
+# === chart 2 / 3 (bar, by month: the shape is the answer) ===
+# Index: Month-end peak skip rate by month (§6)
+[[chat.suggestedActions]]
+render = "chart"
+title = "Month-End Skips"
+label = "When were checkpoints skipped?"
+action = "Inside the month-end peak window, give me the share of over-$10,000 checkpoints the agent cleared itself, for each month. Show it as a bar chart, then say in one line which version was running in the months that are not zero."
+
+# === table 2 / 3 (exposure list) ===
+# Index: Exposure by client institution (§5)
+[[chat.suggestedActions]]
+render = "table"
+title = "Affected Clients"
+label = "Which clients must be notified?"
+action = "List the client institutions whose over-$10,000 checkpoints the agent cleared with no human signature. Give me the institution name, type, primary regulator, number of skipped checkpoints, and total amount. Show it as a Markdown table, and show the SQL you ran."
+
+# === flowchart 2 / 3 (audit funnel) ===
+# Index: Audit sample outcome path (§4)
+[[chat.suggestedActions]]
+render = "flowchart"
+title = "Audit Outcomes"
+label = "What did the human audits find?"
+action = "Trace the audited auto-closed cases from the sample to each verdict: upheld, overturned, partially upheld, and inconclusive, then how many overturned cases should have produced a SAR. Put the count on each stage. Show it as a flowchart."
+
+# === chart 3 / 3 (bar, two series: automation against quality) ===
+# Index: Version quality panorama (§8)
+[[chat.suggestedActions]]
+render = "chart"
+title = "Release Quality"
+label = "Did each release really get better?"
+action = "For v1.0 through v2.1, the versions that have audit samples, give me the auto-close rate and the audit overturn rate. Show it as a bar chart with one series for each, then say in one line whether quality kept up with automation."
+
+# === table 3 / 3 (operational health) ===
+# Index: Tool call health and stale cache (§18)
+[[chat.suggestedActions]]
+render = "table"
+title = "Tool Health"
+label = "Which data sources can't be trusted?"
+action = "For each external tool, give me the number of calls, timeout rate, cache hit rate, share of cached responses older than the version's cache limit, and calls that landed after the decision. Show it as a Markdown table, and show the SQL you ran."
+
+# === flowchart 3 / 3 (release lineage) ===
+# Index: Threshold as the auto-close driver (§12)
+[[chat.suggestedActions]]
+render = "flowchart"
+title = "Version Lineage"
+label = "What changed release by release?"
+action = "Show the version lineage from v1.0 to v3.1, with each version's auto-close threshold, checkpoint mode, and auto-close rate inside its node. Show it as a flowchart."
+
+# === free 3 / 3 ===
+# Index: Reviewer load ratio vs auto-close rate (§11)
+[[chat.suggestedActions]]
+render = "free"
+title = "Review Capacity"
+label = "Was the review team overloaded?"
+action = "Was the human review team too stretched to keep up, forcing the agent to auto-close more cases over time? Compare the weekly review load against capacity and say whether it explains the rise in auto-closes."
