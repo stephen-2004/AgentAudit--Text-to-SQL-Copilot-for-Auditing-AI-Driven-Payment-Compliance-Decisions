@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Dark is the only theme. There is no toggle and no `dark` class, so these are
+ * the dark values themselves rather than an override of light ones. The palette
+ * components draw with is `tailwind.config.ts`; this block mirrors the few
+ * values plain CSS and the shadcn primitives need. */
+:root {
+  color-scheme: dark;
+
+  --font-plex-sans: "IBM Plex Sans", ui-sans-serif, sans-serif;
+  --font-plex-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --background: #0C1219;
+  --foreground: #E3E9F0;
+
+  /* shadcn primitives, as HSL triples. Only what `components/ui/*` and
+   * `tailwind.config.ts` actually resolve. */
+  --card: 214 33% 11%; /* surface #121A24 */
+  --card-foreground: 212 29% 92%;
+  --popover: 214 33% 11%;
+  --popover-foreground: 212 29% 92%;
+  --destructive: 0 84% 69%; /* breach #F26D6D */
+  --destructive-foreground: 0 53% 7%;
+  --input: 214 29% 20%; /* border #243142 */
+  --ring: 191 76% 56%; /* trace #38C6E4 */
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    font-family: var(--font-plex-sans);
+    background-color: var(--background);
+    color: var(--foreground);
+    @apply antialiased;
+  }
+
+  /* Medium, not bold: a console labels things, it does not shout them. */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-plex-sans);
+    @apply font-medium tracking-tight;
+  }
+
+  /* Digits in mono line up in columns, which is the point of setting them in mono. */
+  code, kbd, samp, pre {
+    font-family: var(--font-plex-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    background: rgb(56 198 228 / 0.3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Scrollbar: a quiet thumb on the canvas, not a light gutter. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0C1219;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #243142;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #33445A;
+}
+
+/* ---------------------------------------------------------------------------
+ * Chart tokens, read by `components/chat/blocks/chart/`.
+ *
+ * Stepped for the dark surface and checked with the data-viz validator against
+ * #121A24: every slot inside the lightness band, adjacent CVD separation >= 10.4,
+ * normal-vision >= 19.7, all >= 3:1. The slot ORDER is the colorblind-safety
+ * mechanism (green and magenta must never be neighbours), so assign them in
+ * order and never cycle past the last one.
+ *
+ * Amber and red are absent on purpose: they carry the gap and the breach
+ * everywhere else on the page, and a series wearing them would read as one.
+ * ------------------------------------------------------------------------ */
+.viz-root {
+  color-scheme: dark;
+  --viz-surface: #121A24;
+  --viz-ink: #E3E9F0;
+  --viz-ink-muted: #94A2B4;
+  --viz-grid: #1E2A38;
+  --viz-axis: #3A4B61;
+  /* Single-series bars and lines use one hue (sequential), never one hue per bar. */
+  --viz-seq: #1FA5C6;
+  --viz-series-1: #1FA5C6; /* trace cyan */
+  --viz-series-2: #D55181; /* magenta */
+  --viz-series-3: #9085E9; /* violet */
+  --viz-series-4: #199E70; /* green */
+}
