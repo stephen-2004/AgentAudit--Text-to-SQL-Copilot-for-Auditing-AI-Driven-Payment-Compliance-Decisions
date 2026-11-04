@@ -2,7 +2,7 @@
 
 An AI agent that audits another AI agent — the compliance agent a payments-risk platform uses to auto-close suspicious-transaction cases.
 
-Live demo: <to be added>
+Live demo: https://agentaudit-psi.vercel.app
 
 ## Background
 
